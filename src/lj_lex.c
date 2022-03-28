@@ -322,6 +322,7 @@ static LexToken lex_scan(LexState *ls, TValue *tv)
     case '-':
       lex_next(ls);
       if (ls->c != '-') return '-';
+    case '#':
       lex_next(ls);
       if (ls->c == '[') {  /* Long comment "--[=*[...]=*]". */
 	int sep = lex_skipeq(ls);
@@ -357,6 +358,7 @@ static LexToken lex_scan(LexState *ls, TValue *tv)
     case '>':
       lex_next(ls);
       if (ls->c != '=') return '>'; else { lex_next(ls); return TK_ge; }
+    case '!':
     case '~':
       lex_next(ls);
       if (ls->c != '=') return '~'; else { lex_next(ls); return TK_ne; }

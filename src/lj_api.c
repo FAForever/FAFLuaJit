@@ -1311,3 +1311,78 @@ LUA_API void lua_setallocf(lua_State *L, lua_Alloc f, void *ud)
   g->allocf = f;
 }
 
+// -- FA compatible LuaAPI -------------------------------------
+
+void *index2adrF(lua_State *L, int idx)
+{
+    return index2adr(L, idx);
+}
+
+LUA_API int lua_pcallF(lua_State *L, int nargs, int nresults)
+{
+    return lua_pcall(L, nargs, nresults, 0);
+}
+
+LUA_API int lua_resumeF(lua_State *L, int nargs)
+{
+    int r = lua_resume(L, nargs);
+    return r > 0 ? --r : 0;
+}
+
+LUA_API float lua_tonumberF(lua_State *L, int idx)
+{
+    return (float)lua_tonumber(L, idx);
+}
+
+LUA_API void lua_pushnumberF(lua_State *L, float n)
+{
+    lua_pushnumber(L, n);
+}
+
+LUA_API const char *lua_tostring(lua_State *L, int idx)
+{
+  return lua_tolstring(L, idx, NULL);
+}
+
+LUA_API void lua_newtable(lua_State *L)
+{
+  lua_createtable(L, 0, 0);
+}
+
+LUA_API void* lua_getstateuserdata(lua_State *L)
+{
+  return L->stateUserData;
+}
+
+LUA_API void* lua_getglobaluserdata(lua_State *L)
+{
+  return G(L)->globalUserData;
+}
+
+LUA_API void lua_setglobaluserdata(lua_State *L, void* globalUserData)
+{
+    G(L)->globalUserData = globalUserData;
+}
+
+LUA_API void lua_setgcthreshold(lua_State* L, int newthreshold) {
+    lua_gc(L, LUA_GCSTEP, newthreshold);
+}
+
+LUA_API int lua_getn(lua_State *L, int idx) {
+    cTValue *o = index2adr(L, idx);
+    lj_checkapi(tvistab(o), "stack slot %d is not a table", idx);
+    GCtab* t = tabV(o);
+    cTValue* v = lj_tab_getstr(t, lj_str_newz(L, "n"));
+    if ((v) && (tvisnumber(v))) return numberVint(v);
+    uint32_t i = t->asize;
+    if (i)
+    while (--i)
+        if (!tvisnil(arrayslot(t, i))) break;
+    int max = i;
+    Node* n = noderef(t->node);
+    do {
+        if ((tvisnumber(&n->key)) && (!tvisnil(&n->val)) && (numberVint(&n->key) > max))
+            max = numberVint(&n->key);
+    } while (n = nextnode(n));
+    return max;
+}

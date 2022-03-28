@@ -122,6 +122,7 @@ static GCtab *newtab(lua_State *L, uint32_t asize, uint32_t hbits)
   }
   if (hbits)
     newhpart(L, t, hbits);
+  setgcrefr(t->metatable, basemt_it(G(L), LJ_TTAB));
   return t;
 }
 
@@ -645,6 +646,7 @@ LJ_NOINLINE static MSize tab_len_slow(GCtab *t, size_t hi)
     if (hi > (size_t)(INT_MAX-2)) {  /* Punt and do a linear search. */
       lo = 1;
       while ((tv = lj_tab_getint(t, (int32_t)lo)) && !tvisnil(tv)) lo++;
+      if ((tv = arrayslot(t, 0)) && !tvisnil(tv)) lo++;
       return (MSize)(lo - 1);
     }
   }
@@ -654,6 +656,7 @@ LJ_NOINLINE static MSize tab_len_slow(GCtab *t, size_t hi)
     cTValue *tvb = lj_tab_getint(t, (int32_t)mid);
     if (tvb && !tvisnil(tvb)) lo = mid; else hi = mid;
   }
+  if ((tv = arrayslot(t, 0)) && !tvisnil(tv)) lo++;
   return (MSize)lo;
 }
 
@@ -670,6 +673,7 @@ MSize LJ_FASTCALL lj_tab_len(GCtab *t)
       size_t mid = (lo+hi) >> 1;
       if (tvisnil(arrayslot(t, mid))) hi = mid; else lo = mid;
     }
+    if (!tvisnil(arrayslot(t, 0))) lo++;
     return (MSize)lo;
   }
   /* Without a hash part, there's an implicit nil after the last element. */
