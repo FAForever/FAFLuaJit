@@ -520,6 +520,26 @@ LJLIB_CF(io_type)
   return 1;
 }
 
+#include <io.h>
+LJLIB_CF(io_dir)
+{
+  const char *dir = strdata(lj_lib_checkstr(L, 1));
+  int attrib = lj_lib_optint(L, 2, 0);
+  lua_createtable(L, 0, 0);
+  struct _finddata_t data;
+  int hf = _findfirst(dir, &data);
+  if (hf != -1) {
+    int i = 1;
+    do {
+      if ((data.attrib & attrib) != attrib) continue;
+      lua_pushstring(L, data.name);
+      lua_rawseti(L, -2, i++);
+    } while (_findnext(hf, &data) != -1);
+    _findclose(hf);
+  };
+  return 1;
+}
+
 #include "lj_libdef.h"
 
 /* ------------------------------------------------------------------------ */

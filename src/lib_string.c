@@ -543,6 +543,7 @@ LJLIB_CF(string_gmatch)
   lj_lib_pushcc(L, lj_cf_string_gmatch_aux, FF_string_gmatch_aux, 3);
   return 1;
 }
+LJLIB_PUSH(lastcl) LJLIB_SET(gfind)
 
 static void add_s(MatchState *ms, luaL_Buffer *b, const char *s, const char *e)
 {
@@ -659,15 +660,8 @@ LJLIB_CF(string_format)		LJLIB_REC(.)
 
 LUALIB_API int luaopen_string(lua_State *L)
 {
-  GCtab *mt;
-  global_State *g;
   LJ_LIB_REG(L, LUA_STRLIBNAME, string);
-  mt = lj_tab_new(L, 0, 1);
-  /* NOBARRIER: basemt is a GC root. */
-  g = G(L);
-  setgcref(basemt_it(g, LJ_TSTR), obj2gco(mt));
-  settabV(L, lj_tab_setstr(L, mt, mmname_str(g, MM_index)), tabV(L->top-1));
-  mt->nomm = (uint8_t)(~(1u<<MM_index));
+  setgcref(basemt_it(G(L), LJ_TSTR), obj2gco(tabV(L->top-1)));
 #if LJ_HASBUFFER
   lj_lib_prereg(L, LUA_STRLIBNAME ".buffer", luaopen_string_buffer, tabV(L->top-1));
 #endif

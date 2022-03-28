@@ -548,6 +548,25 @@ LJLIB_CF(print)
 LJLIB_PUSH(top-3)
 LJLIB_SET(_VERSION)
 
+LJLIB_CF(require)
+{
+  return 0;
+}
+
+#include "lj_libdef.h"
+
+#define LJLIB_MODULE_serialize
+
+LJLIB_CF(serialize_tostring)
+{
+  return 0;
+}
+
+LJLIB_CF(serialize_fromstring)
+{
+  return 0;
+}
+
 #include "lj_libdef.h"
 
 /* -- Coroutine library --------------------------------------------------- */
@@ -691,6 +710,7 @@ LUALIB_API int luaopen_base(lua_State *L)
   newproxy_weaktable(L);  /* top-2. */
   LJ_LIB_REG(L, "_G", base);
   LJ_LIB_REG(L, LUA_COLIBNAME, coroutine);
+  LJ_LIB_REG(L, "serialize", serialize);
   return 2;
 }
 

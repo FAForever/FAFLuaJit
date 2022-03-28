@@ -143,9 +143,16 @@ cTValue *lj_meta_tget(lua_State *L, cTValue *o, cTValue *k)
       if (!tvisnil(tv) ||
 	  !(mo = lj_meta_fast(L, tabref(t->metatable), MM_index)))
 	return tv;
-    } else if (tvisnil(mo = lj_meta_lookup(L, o, MM_index))) {
-      lj_err_optype(L, o, LJ_ERR_OPINDEX);
-      return NULL;  /* unreachable */
+    } else if (tvisudata(o)) {
+      if (tvisnil(mo = lj_meta_lookup(L, o, MM_index)))
+        return niltv(L);
+    } else {
+      //If object is not table/udata find key in their default meta as LuaPlus
+      GCtab *t = tabref(basemt_obj(G(L), o));
+      if (t) {
+        mo = &G(L)->tmptv;
+        settabV(L, (TValue*)mo, t);
+      } else return niltv(L);
     }
     if (tvisfunc(mo)) {
       L->top = mmcall(L, lj_cont_ra, mo, o, k);
@@ -182,8 +189,15 @@ TValue *lj_meta_tset(lua_State *L, cTValue *o, cTValue *k)
 	return lj_tab_newkey(L, t, k);
       }
     } else if (tvisnil(mo = lj_meta_lookup(L, o, MM_newindex))) {
-      lj_err_optype(L, o, LJ_ERR_OPINDEX);
-      return NULL;  /* unreachable */
+      //If object is not table/udata find key in their default meta as LuaPlus
+      GCtab *t = tabref(basemt_obj(G(L), o));
+      if (t) {
+        mo = &G(L)->tmptv;
+        settabV(L, (TValue*)mo, t);
+      } else {
+        lj_err_optype(L, o, LJ_ERR_OPINDEX);
+        return NULL;  /* unreachable */
+      }
     }
     if (tvisfunc(mo)) {
       L->top = mmcall(L, lj_cont_nop, mo, o, k);
@@ -420,6 +434,9 @@ TValue *lj_meta_comp(lua_State *L, cTValue *o1, cTValue *o2, int op)
   } else if (tvisbool(o1) && tvisbool(o2)) {
     goto trymt;
   } else {
+    //If types inequality, their indexes are compared
+    //return (TValue*)(op & 1); //Return false
+    return (TValue*)((op & 1) ? itype(o1) < itype(o2) : itype(o1) > itype(o2)); //As FA
   err:
     lj_err_comp(L, o1, o2);
     return NULL;
