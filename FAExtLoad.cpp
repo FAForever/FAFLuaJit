@@ -74,7 +74,7 @@ FuncDesc Funcs[] = {
     {"?IsUserData@LuaObject@@QBE_NXZ", 0x907320},
     {"?Lookup@LuaObject@@QBE?AV1@PBD@Z", 0x9093b0},
     {"?LuaPlusH_next@@YA_NPAVLuaState@@PBVLuaObject@@PAV2@2@Z", 0x90a6b0},
-    {"?PushStack@LuaObject@@QBE?AVLuaStackObject@@PAVLuaState@@@Z", 0x907d80},
+    {"?PushStack@LuaObject@@QBEXPAVLuaStackObject@@PAVLuaState@@@Z", 0x907d80},
     {"?PushStack@LuaObject@@QBEXPAUlua_State@@@Z", 0x907d10},
     {"?Register@LuaObject@@QAEXPBDP6AHPAUlua_State@@@ZH@Z", 0x907630},
     {"?Reset@LuaObject@@QAEXXZ", 0x9075f0},
@@ -172,7 +172,7 @@ FuncDesc Funcs[] = {
     {"", 0x90c890},
     {"lua_rawget", 0x90d050},
     {"lua_rawgeti", 0x90d0a0},
-    {"", 0x90d2a0},
+    {"lua_rawset", 0x90d2a0},
     {"lua_rawseti", 0x90d2f0},
     {"", 0x90c5f0},
     {"", 0x90c690},
@@ -211,24 +211,20 @@ FuncDesc Funcs[] = {
     {"", 0x90c340},
 };
 
-#define _stdcall __attribute__((stdcall))
+#include "include/global.h"
 
-typedef _stdcall void* _LoadLibrary(char* lpLibFileName);
-typedef _stdcall void* _GetModuleHandle(char* lpLibFileName);
-typedef _stdcall void* _GetProcAddress(void* hModule, char* lpProcName);
-typedef _stdcall int _VirtualProtect(void* lpAddress, int dwSize, int flNewProtect, int* lpflOldProtect);
+typedef __stdcall void* LoadLibrary_t(char *lpLibFileName);
+typedef __stdcall int VirtualProtect_t(void *lpAddress, int dwSize, int flNewProtect, int *lpflOldProtect);
 
 void FAExtLoad()
 {
-    _GetModuleHandle* GetModuleHandle = *(int*)(0xC0F378);
-    _GetProcAddress* GetProcAddress = *(int*)(0xC0F48C);
-    void* Kernel = GetModuleHandle("KERNEL32");
-    _LoadLibrary* LoadLibrary = GetProcAddress(Kernel, "LoadLibraryA");
-    _VirtualProtect* VirtualProtect = GetProcAddress(Kernel, "VirtualProtect");
-    void* ldll = LoadLibrary("FAExt.dll");
+    void *Kernel = GetModuleHandle("KERNEL32");
+    LoadLibrary_t *LoadLibrary = GetProcAddress(Kernel, "LoadLibraryA");
+    VirtualProtect_t *VirtualProtect = GetProcAddress(Kernel, "VirtualProtect");
+    void *ldll = LoadLibrary("FAExt.dll");
     if (ldll)
     for (int i = 0; i < sizeof(Funcs) / sizeof(Funcs[0]); i++) {
-        char* FPtr = GetProcAddress(ldll, Funcs[i].Name);
+        char *FPtr = GetProcAddress(ldll, Funcs[i].Name);
         //if (FPtr) {
             int OldProtect;
             char* Ptr = Funcs[i].Ptr;
@@ -238,8 +234,8 @@ void FAExtLoad()
             VirtualProtect(Ptr, 5, OldProtect, &OldProtect);
         //}
     }
-    __asm(
-        "ADD ESP,0x2C \n"
+    asm(
+        "ADD ESP,0x3C \n"
         "POP EBX \n"
         "POP ESI \n"
         "POP EDI \n"

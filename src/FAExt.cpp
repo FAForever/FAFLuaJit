@@ -110,7 +110,7 @@ class LUA_API LuaObject {
     LuaObject GetMetaTable() const;
 
     void PushStack(lua_State* L) const;
-    LuaStackObject PushStack(LuaState* state) const;
+    void PushStack(LuaStackObject* out, LuaState* state) const;
 
     void AssignNil(LuaState* state);
     void AssignBoolean(LuaState* state, bool value);
@@ -615,11 +615,11 @@ void LuaObject::PushStack(lua_State* L) const {
     incr_top(L);
 }
 
-LuaStackObject LuaObject::PushStack(LuaState* state) const {
+void LuaObject::PushStack(LuaStackObject* out, LuaState* state) const {
     lua_State* L = state->L;
     copyTV(L, L->top, &m_object);
     incr_top(L);
-    return LuaStackObject(state, lua_gettop(L));
+    *out = LuaStackObject(state, lua_gettop(L));
 }
 
 void LuaObject::AssignNil(LuaState* state) {
