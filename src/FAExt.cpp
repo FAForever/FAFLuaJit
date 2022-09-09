@@ -160,6 +160,18 @@ void LuaPlusGCFunction(void* s) {
     }
 }
 
+void ThrowException(void* L, int errcode) {
+    typedef void* (__thiscall *_luaError_Init)(void* t, void* L, int i);
+    const auto luaError_Init = (_luaError_Init)0x90DA40;
+    typedef void (__stdcall *_CxxThrowException)(void *a1, void *a2);
+    const auto CxxThrowException = (_CxxThrowException)0xA89950;
+
+    struct {void* vtable; char pad[0x2C];} luaError;
+    luaError_Init(&luaError, L, 1);
+    luaError.vtable = (void*)0xD45958; // .?AUlua_RuntimeError@@
+    CxxThrowException(&luaError, (void*)0xEA5BE0);
+}
+
 LuaState::LuaState(int initLibs) {
     L = luaL_newstate();
     ForMultipleThreads = 0;
@@ -182,6 +194,7 @@ LuaState::LuaState(int initLibs) {
     }
     lua_gc(L, LUA_GCSTOP, 0);
     L->stateUserData = this;
+    G(L)->throwException = ThrowException;
     G(L)->userGCFunction = LuaPlusGCFunction;
     GetGlobals().Register((char*)0xE09B24,(lua_CFunction)0x90A8C0,0);
 }

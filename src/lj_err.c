@@ -278,7 +278,6 @@ LJ_FUNCA int lj_err_unwind_win(EXCEPTION_RECORD *rec,
 #if !LJ_TARGET_CYGWIN
 	__DestructExceptionObject(rec, 1);
 #endif
-	setstrV(L, L->top++, lj_err_str(L, LJ_ERR_ERRCPP));
       } else if (!LJ_EXCODE_CHECK(rec->ExceptionCode)) {
 	/* Don't catch access violations etc. */
 	return 1;  /* ExceptionContinueSearch */
@@ -740,6 +739,8 @@ LJ_NOINLINE void LJ_FASTCALL lj_err_throw(lua_State *L, int errcode)
   lj_trace_abort(g);
   L->status = LUA_OK;
 #if LJ_UNWIND_EXT
+  if (g->throwException)
+    g->throwException(L, errcode);
   err_raise_ext(g, errcode);
   /*
   ** A return from this function signals a corrupt C stack that cannot be

@@ -20,7 +20,7 @@ Results:
 
 ToDo:
 
- Handling of Lua errors, mods with localization, save/load, desyncs,
+ Traceback of Lua errors, mods with localization, save/load, desyncs,
   require & FFI security, repair list bytecode, something else.
 
 Development has been suspended due to the lack of a noticeable performance gains.

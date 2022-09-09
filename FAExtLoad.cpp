@@ -105,7 +105,7 @@ FuncDesc Funcs[] = {
     {"", 0x90e400},
     {"", 0x90dda0},
     {"", 0x90ea70},
-    {"", 0x90eaa0},
+    {"luaL_checklstring", 0x90eaa0},
     {"", 0x90eb70},
     {"", 0x90dd10},
     {"", 0x90ea20},
