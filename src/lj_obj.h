@@ -658,6 +658,7 @@ typedef struct global_State {
   MRef ctype_state;	/* Pointer to C type state. */
   PRNGState prng;	/* Global PRNG state. */
   GCRef gcroot[GCROOT_MAX];  /* GC roots. */
+  void (*throwException)(void*, int);
   void (*userGCFunction)(void*);
   void* globalUserData;
 } global_State;
