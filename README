@@ -20,8 +20,7 @@ Results:
 
 ToDo:
 
- Mods with localization, save/load, desyncs,
-  require & FFI security, repair list bytecode, something else.
+ Save/load, desyncs, require & FFI security, repair list bytecode, something else.
 
 Development has been suspended due to the lack of a noticeable performance gains.
 

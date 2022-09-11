@@ -200,6 +200,7 @@ LuaState::LuaState(int initLibs) {
     G(L)->throwException = ThrowException;
     G(L)->userGCFunction = LuaPlusGCFunction;
     GetGlobals().Register((char*)0xE09B24,(lua_CFunction)0x90A8C0,0);
+    GetGlobals().Register((char*)0xD44E98,(lua_CFunction)0x90A8C0,0);
 }
 
 LuaState::LuaState(LuaState* parentState) {
