@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release Version'
+        required: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Configure MSVC for x86
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - uses: actions/checkout@v2
+
+      - name: Build FAFLuaJit
+        run: |
+          cd src
+          ./msvcbuild.bat
+
+      - name: Build FAExt
+        run: |
+          cd src
+          ./FAExt.bat
+
+      - name: Zip FAFLuaJit
+        uses: papeloto/action-zip@v1
+        with:
+          files: src/luajit.exe src/lua51.dll
+          dest: FAFLuaJit.zip
+
+      - name: Create Draft Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: v${{ github.event.inputs.version }}
+          draft: true
+          prerelease: true
+
+      - name: Upload FAFLuaJit
+        id: upload_FAFLuaJit
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: FAFLuaJit.zip
+          asset_name: FAFLuaJit.zip
+          asset_content_type: application/vnd.microsoft.portable-executable
+
+      - name: Upload FAExt
+        id: upload_FAExt
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: src/FAExt.dll
+          asset_name: FAExt.dll
+          asset_content_type: application/vnd.microsoft.portable-executable
