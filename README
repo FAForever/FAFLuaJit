@@ -1,3 +1,30 @@
+README for LuaJIT 2.1-FAF
+-------------------------
+
+How to build:
+
+ 1) Need MSVC x86 console(tested on MSVC 2022)
+ 2) Run msvcbuild.bat(+debug)
+ 3) Run FAExt.bat(+debug)
+ 4) Copy FAExt.dll into FAF bin dir.
+
+Patch for embed into FAF:
+
+ FAExtLoad.cpp is section
+ HFAExtLoad.cpp is hook
+ https://github.com/FAForever/FA_Patcher (requires v2)
+
+Results:
+
+ Lobby test gains x4-x7 speedup, ingame ~+0.5 sim.
+
+ToDo:
+
+ Save/load, desyncs, require & FFI security, repair list bytecode, something else.
+
+Development has been suspended due to the lack of a noticeable performance gains.
+
+
 README for LuaJIT 2.1
 ---------------------
 
@@ -13,4 +40,3 @@ Documentation for LuaJIT is available in HTML format.
 Please point your favorite browser to:
 
  doc/luajit.html
-
