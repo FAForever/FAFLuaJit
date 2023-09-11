@@ -45,6 +45,13 @@ enum {
 #define fixstring(s)	((s)->marked |= LJ_GC_FIXED)
 #define markfinalized(x)	((x)->gch.marked |= LJ_GC_FINALIZED)
 
+/* Mark a TValue (if needed). */
+#define gc_marktv(g, tv) \
+  { lj_assertG(!tvisgcv(tv) || (~itype(tv) == gcval(tv)->gch.gct), \
+	       "TValue and GC type mismatch"); \
+    if (tviswhite(tv)) gc_mark(g, gcV(tv)); }
+void gc_mark(global_State *g, GCobj *o);
+
 /* Collector. */
 LJ_FUNC size_t lj_gc_separateudata(global_State *g, int all);
 LJ_FUNC void lj_gc_finalize_udata(lua_State *L);

@@ -34,8 +34,8 @@
 ** pseudo-indices
 */
 #define LUA_REGISTRYINDEX	(-10000)
-#define LUA_ENVIRONINDEX	(-10001)
-#define LUA_GLOBALSINDEX	(-10002)
+#define LUA_GLOBALSINDEX	(-10001)
+#define LUA_ENVIRONINDEX	(0x80000000)
 #define lua_upvalueindex(i)	(LUA_GLOBALSINDEX-(i))
 
 
@@ -255,7 +255,7 @@ LUA_API void lua_setallocf (lua_State *L, lua_Alloc f, void *ud);
 
 #define lua_pop(L,n)		lua_settop(L, -(n)-1)
 
-#define lua_newtable(L)		lua_createtable(L, 0, 0)
+LUA_API void lua_newtable(lua_State *L);
 
 #define lua_register(L,n,f) (lua_pushcfunction(L, (f)), lua_setglobal(L, (n)))
 
@@ -278,9 +278,13 @@ LUA_API void lua_setallocf (lua_State *L, lua_Alloc f, void *ud);
 #define lua_setglobal(L,s)	lua_setfield(L, LUA_GLOBALSINDEX, (s))
 #define lua_getglobal(L,s)	lua_getfield(L, LUA_GLOBALSINDEX, (s))
 
-#define lua_tostring(L,i)	lua_tolstring(L, (i), NULL)
+LUA_API const char* lua_tostring(lua_State *L, int idx);
+LUA_API int lua_getn(lua_State *L, int idx);
 
-
+void *index2adrF(lua_State *L, int idx);
+int FAlua_type(lua_State *L, void *o);
+LUA_API float lua_tonumberF(lua_State *L, int idx);
+LUA_API void lua_pushnumberF(lua_State *L, float n);
 
 /*
 ** compatibility macros and functions

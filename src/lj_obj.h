@@ -171,7 +171,7 @@ typedef union {
 } FrameLink;
 
 /* Tagged value. */
-typedef LJ_ALIGN(8) union TValue {
+typedef union TValue {
   uint64_t u64;		/* 64 bit pattern overlaps number. */
   lua_Number n;		/* Number object overlaps split tag/value object. */
 #if LJ_GC64
@@ -327,6 +327,7 @@ typedef struct GCudata {
   GCRef env;		/* Should be at same offset in GCfunc. */
   MSize len;		/* Size of payload. */
   GCRef metatable;	/* Must be at same offset in GCtab. */
+  void* t;		/* FA class type ref */
   uint32_t align1;	/* To force 8 byte alignment of the payload. */
 } GCudata;
 
@@ -657,6 +658,9 @@ typedef struct global_State {
   MRef ctype_state;	/* Pointer to C type state. */
   PRNGState prng;	/* Global PRNG state. */
   GCRef gcroot[GCROOT_MAX];  /* GC roots. */
+  void (*throwException)(void*, int);
+  void (*userGCFunction)(void*);
+  void* globalUserData;
 } global_State;
 
 #define mainthread(g)	(&gcref(g->mainthref)->th)
@@ -697,6 +701,8 @@ struct lua_State {
   GCRef env;		/* Thread environment (table of globals). */
   void *cframe;		/* End of C stack frame chain. */
   MSize stacksize;	/* True stack size (incl. LJ_STACK_EXTRA). */
+  int pad[5];
+  void* stateUserData;  //+0x44
 };
 
 #define G(L)			(mref(L->glref, global_State))

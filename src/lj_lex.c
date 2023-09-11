@@ -55,6 +55,8 @@ static LJ_NOINLINE LexChar lex_more(LexState *ls)
     ls->endmark = 1;
   }
   ls->pe = p + sz;
+  if ((uint8_t)p[0] == 0xef && sz > 2 && (uint8_t)p[1] == 0xbb &&
+      (uint8_t)p[2] == 0xbf) p += 3; // Skip UTF-8 BOM
   ls->p = p + 1;
   return (LexChar)(uint8_t)p[0];
 }
@@ -322,6 +324,7 @@ static LexToken lex_scan(LexState *ls, TValue *tv)
     case '-':
       lex_next(ls);
       if (ls->c != '-') return '-';
+    case '#':
       lex_next(ls);
       if (ls->c == '[') {  /* Long comment "--[=*[...]=*]". */
 	int sep = lex_skipeq(ls);
@@ -357,6 +360,7 @@ static LexToken lex_scan(LexState *ls, TValue *tv)
     case '>':
       lex_next(ls);
       if (ls->c != '=') return '>'; else { lex_next(ls); return TK_ge; }
+    case '!':
     case '~':
       lex_next(ls);
       if (ls->c != '=') return '~'; else { lex_next(ls); return TK_ne; }

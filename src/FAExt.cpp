@@ -86,7 +86,8 @@ class LUA_API LuaObject {
     LuaObject operator[](const char* key) const;
     LuaObject operator[](int index) const;
 
-    int LuaObject::Type() const;
+    int Type() const;
+    const char* TypeName() const;
 
     bool IsConvertibleToString() const;
 
@@ -537,6 +538,10 @@ LuaObject LuaObject::operator[](int index) const {
 
 int LuaObject::Type() const {
     return FAlua_type(m_state->L, (void*)&m_object);
+}
+
+const char* LuaObject::TypeName() const {
+    return lua_typename(m_state->L, Type());
 }
 
 bool LuaObject::IsConvertibleToString() const {

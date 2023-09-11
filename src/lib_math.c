@@ -75,6 +75,7 @@ LJLIB_ASM(math_atan2)		LJLIB_REC(.)
 }
 LJLIB_ASM_(math_pow)		LJLIB_REC(.)
 LJLIB_ASM_(math_fmod)
+LJLIB_PUSH(lastcl) LJLIB_SET(mod)
 
 LJLIB_ASM(math_ldexp)		LJLIB_REC(.)
 {

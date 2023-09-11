@@ -394,6 +394,12 @@ LJLIB_CF(debug_traceback)
   return 1;
 }
 
+LJLIB_CF(debug_allocatedsize)
+{
+  lua_pushinteger(L, 1);
+  return 1;
+}
+
 /* ------------------------------------------------------------------------ */
 
 #include "lj_libdef.h"

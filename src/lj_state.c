@@ -147,6 +147,16 @@ static TValue *cpluaopen(lua_State *L, lua_CFunction dummy, void *ud)
   UNUSED(dummy);
   UNUSED(ud);
   stack_init(L, L);
+
+  //Creates default metatables for types as LuaPlus
+  GCtab* gmt = lj_tab_new(L, 0, 0);
+  setgcref(gmt->metatable, obj2gco(gmt));
+  for (int i = GCROOT_BASEMT; i <= GCROOT_BASEMT_NUM; i++) {
+    GCtab* mt = lj_tab_new(L, 0, 0);
+    setgcref(mt->metatable, obj2gco(gmt));
+    setgcref(g->gcroot[i], obj2gco(mt));
+  }
+
   /* NOBARRIER: State initialization, all objects are white. */
   setgcref(L->env, obj2gco(lj_tab_new(L, 0, LJ_MIN_GLOBAL)));
   settabV(L, registry(L), lj_tab_new(L, 0, LJ_MIN_REGISTRY));

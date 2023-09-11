@@ -20,6 +20,18 @@ void lj_assert_fail(global_State *g, const char *file, int line,
   fprintf(stderr, "LuaJIT ASSERT %s:%d: %s: ", file, line, func);
   vfprintf(stderr, fmt, argp);
   fputc('\n', stderr);
+
+  if (g->throwException) {
+    int len = snprintf(0, 0, "LuaJIT ASSERT %s:%d: %s: ", file, line, func);
+    int len2 = vsnprintf(0, 0, fmt, argp) + 1;
+    char* str = malloc(len + len2);
+    snprintf(str, len + 1, "LuaJIT ASSERT %s:%d: %s: ", file, line, func);
+    vsnprintf(str + len, len2, fmt, argp);
+    typedef int (*_FileWrite)(int fileIndex, const char *str, int strlen);
+    const _FileWrite FileWrite = (_FileWrite)0xA9B4E6;
+    FileWrite(3, str, len + len2 - 1);
+  }
+
   va_end(argp);
   UNUSED(g);  /* May be NULL. TODO: optionally dump state. */
   abort();

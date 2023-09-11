@@ -41,12 +41,6 @@
 
 /* -- Mark phase ---------------------------------------------------------- */
 
-/* Mark a TValue (if needed). */
-#define gc_marktv(g, tv) \
-  { lj_assertG(!tvisgcv(tv) || (~itype(tv) == gcval(tv)->gch.gct), \
-	       "TValue and GC type mismatch"); \
-    if (tviswhite(tv)) gc_mark(g, gcV(tv)); }
-
 /* Mark a GCobj (if needed). */
 #define gc_markobj(g, o) \
   { if (iswhite(obj2gco(o))) gc_mark(g, obj2gco(o)); }
@@ -55,7 +49,7 @@
 #define gc_mark_str(s)		((s)->marked &= (uint8_t)~LJ_GC_WHITES)
 
 /* Mark a white GCobj. */
-static void gc_mark(global_State *g, GCobj *o)
+void gc_mark(global_State *g, GCobj *o)
 {
   int gct = o->gch.gct;
   lj_assertG(iswhite(o), "mark of non-white object");
@@ -96,6 +90,8 @@ static void gc_mark_gcroot(global_State *g)
   for (i = 0; i < GCROOT_MAX; i++)
     if (gcref(g->gcroot[i]) != NULL)
       gc_markobj(g, gcref(g->gcroot[i]));
+  if (g->userGCFunction)
+    g->userGCFunction(g);
 }
 
 /* Start a GC cycle and mark the root set. */
