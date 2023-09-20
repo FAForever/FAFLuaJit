@@ -748,3 +748,15 @@ LUA_API bool LuaPlusH_next(LuaState* state, const LuaObject* table, LuaObject* k
     }
     return false;
 }
+
+extern "C" {
+LUA_API void GetTableAH(GCtab* t, uint32_t *asize, uint8_t *hbits) {
+    *asize = t->asize;
+    *hbits = 0;
+    uint32_t hmask = t->hmask << 1;
+    while (hmask > 1) {
+        hmask >>= 1;
+        *hbits++;
+    }
+}
+}
