@@ -269,6 +269,8 @@ void LuaObject::RemoveFromUsedList() {
     if (m_next)
         m_next->m_prev = m_prev; else
         m_state->m_headObject = m_prev;
+    lua_State* L = m_state->L;
+    checklivetv(L, &m_object, "remove dead GC object");
 }
 
 void LuaObject::UpdateUsedList(LuaState* state) {
@@ -335,8 +337,6 @@ LuaObject& LuaObject::operator=(const LuaStackObject& src) {
 }
 
 LuaObject::~LuaObject() {
-    lua_State* L = m_state->L;
-    checklivetv(L, &m_object, "destroy dead GC object");
     RemoveFromUsedList();
 }
 
